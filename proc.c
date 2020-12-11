@@ -334,8 +334,6 @@ waitpid(int pid, int *status, int options)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     // Only if pid matches
       if (pid == p->pid) {
-        if(p->parent != curproc)
-          continue;
         havekids = 1;
         if(p->state == ZOMBIE){
           // Found one.
