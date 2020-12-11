@@ -77,10 +77,15 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
-  // Case to handle page fault (Lab3: Growing stack.)
+		  
+  // Case to handle page faults
   case T_PGFLT:; 
-    uint offAddr = PGROUNDDOWN(rcr2());
-    uint stackTop = STACKBASE - (myproc()->stackSZ * PGSIZE);
+    uint offAddr = PGROUNDDOWN(rcr2()); 	//rcr2() returns the value stored in Control Register(CR2)
+    uint stackTop = USERSTACKBASE - (myproc()->stackSZ * PGSIZE);
+    // If the page fault is caused by an access to the page right below the 
+    // top of the stack, then we allocate and map the page.
+    // If the page fault is caused by a different address then we use the default handler to
+    // perform a kernal panic and get the address of the page fault by calling rcr2()
     if(offAddr <= stackTop && offAddr >= (stackTop - PGSIZE)) {
       if(allocuvm(myproc()->pgdir, offAddr, stackTop) == 0) {
 	      cprintf("case T_PGFLT from trap.c: allocuvm failed. Number of current allocated pages: %d\n", myproc()->stackSZ);
