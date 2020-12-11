@@ -77,6 +77,21 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
+  // Case to handle page fault (Lab3: Growing stack.)
+  case T_PGFLT:; 
+    uint offAddr = PGROUNDDOWN(rcr2());
+    uint stackTop = STACKBASE - (myproc()->stackSZ * PGSIZE);
+    if(offAddr <= stackTop && offAddr >= (stackTop - PGSIZE)) {
+      if(allocuvm(myproc()->pgdir, offAddr, stackTop) == 0) {
+	      cprintf("case T_PGFLT from trap.c: allocuvm failed. Number of current allocated pages: %d\n", myproc()->stackSZ);
+	      exit();
+      }
+      //Increment number of stack pages when allocuvm is successful
+      myproc()->stackSZ += 1;
+      cprintf("case T_PGFLT from trap.c: allocuvm succeeded. Number of pages allocated: %d\n", myproc()->stackSZ);
+      break; 
+    }
+
 
   //PAGEBREAK: 13
   default:
