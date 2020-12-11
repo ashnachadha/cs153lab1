@@ -89,7 +89,7 @@ trap(struct trapframe *tf)
     if(offAddr <= stackTop && offAddr >= (stackTop - PGSIZE)) {
       if(allocuvm(myproc()->pgdir, offAddr, stackTop) == 0) {
 	      cprintf("case T_PGFLT from trap.c: allocuvm failed. Number of current allocated pages: %d\n", myproc()->stackSZ);
-	      exit();
+	      exit(0);
       }
       //Increment number of stack pages when allocuvm is successful
       myproc()->stackSZ += 1;
